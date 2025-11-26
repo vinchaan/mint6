@@ -1,51 +1,114 @@
-from django.conf import settings
+# recipes/views/create_recipe_view.py
+
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
-from recipes.forms import RecipeForm
-from django.views.generic.edit import FormView
+from django.views.generic import CreateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+from recipes.models import Recipe
+from recipes.forms.recipe_form import RecipeForm, IngredientFormSet, StepFormSet
 
 
-class CreateRecipeView(LoginRequiredMixin, FormView):
-    """
-    Allow authenticated users to view and update their profile information.
-
-    This class-based view displays a user profile editing form and handles
-    updates to the authenticated user’s profile. Access is restricted to
-    logged-in users via `LoginRequiredMixin`.
-    """
-
-    template_name = "create_recipe.html"
+class CreateRecipeView(LoginRequiredMixin, CreateView):
+    model = Recipe
     form_class = RecipeForm
-    get_success_url = settings.REDIRECT_URL_WHEN_LOGGED_IN
+    template_name = "create_recipe.html"
 
-    def form_valid(self, form):
+    def _make_formsets(self, data=None):
+        """
+        Helper: construct both formsets with prefixes.
+        """
+        ingredient_formset = IngredientFormSet(
+            data=data,
+            prefix="ingredients",
+        )
+        step_formset = StepFormSet(
+            data=data,
+            prefix="steps",
+        )
+        return ingredient_formset, step_formset
+
+    def get(self, request, *args, **kwargs):
+        form = self.form_class()
+        ingredient_formset, step_formset = self._make_formsets()
+        return self.render_to_response({
+            "form": form,
+            "ingredient_formset": ingredient_formset,
+            "step_formset": step_formset,
+        })
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        ingredient_formset, step_formset = self._make_formsets(request.POST)
+
+        if "add_ingredient" in request.POST:
+            data = request.POST.copy()
+            total = int(data.get("ingredients-TOTAL_FORMS", 0))
+            data["ingredients-TOTAL_FORMS"] = str(total + 1)
+            ingredient_formset, step_formset = self._make_formsets(data)
+
+            return self.render_to_response({
+                "form": form,
+                "ingredient_formset": ingredient_formset,
+                "step_formset": step_formset,
+            })
+
+        if "add_step" in request.POST:
+            data = request.POST.copy()
+            total = int(data.get("steps-TOTAL_FORMS", 0))
+            data["steps-TOTAL_FORMS"] = str(total + 1)
+            ingredient_formset, step_formset = self._make_formsets(data)
+            return self.render_to_response({
+                "form": form,
+                "ingredient_formset": ingredient_formset,
+                "step_formset": step_formset,
+            })
+
+        if (
+            form.is_valid()
+            and ingredient_formset.is_valid()
+            and step_formset.is_valid()
+        ):
+            return self._save_all(form, ingredient_formset, step_formset)
+
+        return self.render_to_response({
+            "form": form,
+            "ingredient_formset": ingredient_formset,
+            "step_formset": step_formset,
+        })
+
+    def _save_all(self, form, ingredient_formset, step_formset):
+   
         form.instance.author = self.request.user
-        messages.success(self.request, "Recipe created!")
-        return super().form_valid(form)
+        self.object = form.save(commit=False)
+        self.object.save()
 
-    def get_object(self):
-        """
-        Retrieve the user object to be edited.
+        form.save_m2m()
 
-        This ensures that users can only update their own profile, rather
-        than any other user’s data.
+        ingredient_formset.instance = self.object
+        pos = 1
+        for f in ingredient_formset.forms:
+            if not f.cleaned_data or f.cleaned_data.get("DELETE"):
+                continue
+            f.instance.position = pos
+            pos += 1
+        ingredient_formset.save()
 
-        Returns:
-            User: The currently authenticated user instance.
-        """
-        user = self.request.user
-        return user
+        step_formset.instance = self.object
+        pos = 1
+        for f in step_formset.forms:
+            if not f.cleaned_data or f.cleaned_data.get("DELETE"):
+                continue
+            f.instance.position = pos
+            pos += 1
+        step_formset.save()
 
-    def get_success_url(self):
-        """
-        Determine the redirect URL after a successful profile update.
+        messages.success(self.request, "Recipe added!")
+        return self.redirect_success()
 
-        Also adds a success message to inform the user that their profile
-        was successfully updated.
-
-        Returns:
-            str: The URL to redirect to (typically the dashboard or user home).
-        """
-        messages.add_message(self.request, messages.SUCCESS, "Profile updated!")
-        return reverse(settings.REDIRECT_URL_WHEN_LOGGED_IN)
+    def redirect_success(self):
+        return self.render_to_response({
+            "form": self.form_class(),
+            "ingredient_formset": IngredientFormSet(prefix="ingredients"),
+            "step_formset": StepFormSet(prefix="steps"),
+        })

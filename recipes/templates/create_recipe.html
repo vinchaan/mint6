@@ -3,12 +3,52 @@
 <div class="container">
   <div class="row">
     <div class="col-12">
+
       <h1>Create recipe</h1>
+
       <form action="{% url 'create_recipe' %}" method="post">
         {% csrf_token %}
+      
         {% include 'partials/bootstrap_form.html' with form=form %}
-        <input type="submit" value="Create recipe" class="btn btn-primary">
+      
+        <h3>Ingredients</h3>
+        {{ ingredient_formset.management_form }}
+        {% for ing_form in ingredient_formset %}
+          <div class="ingredient-form">
+            {{ ing_form.as_p }}
+          </div>
+        {% endfor %}
+        <button type="submit"
+                name="add_ingredient"
+                value="1"
+                class="btn btn-sm btn-outline-secondary">
+          + Add ingredient
+        </button>
+      
+        <h3>Steps</h3>
+        {{ step_formset.management_form }}
+        {% for step_form in step_formset %}
+          <div class="step-form">
+            {{ step_form.as_p }}
+          </div>
+        {% endfor %}
+        <button type="submit"
+                name="add_step"
+                value="1"
+                class="btn btn-sm btn-outline-secondary">
+          + Add step
+        </button>
+      
+        <hr>
+        <button type="submit"
+                name="save"
+                value="1"
+                class="btn btn-primary">
+          Save recipe
+        </button>
       </form>
+      
+
     </div>
   </div>
 </div>
