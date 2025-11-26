@@ -3,8 +3,14 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from libgravatar import Gravatar
 
+
 class User(AbstractUser):
     """Model used for user authentication, and team member related information."""
+
+    class Roles(models.TextChoices):
+        ADMIN = 'admin', 'Admin'
+        USER = 'user', 'User'
+        MODERATOR = 'moderator', 'Moderator'
 
     username = models.CharField(
         max_length=30,
@@ -17,12 +23,23 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
     email = models.EmailField(unique=True, blank=False)
-
+    role = models.CharField(
+        max_length=20,
+        choices=Roles.choices,
+        default=Roles.USER,
+        help_text='Used to determine what level of authority the user has in the UI.'
+    )
 
     class Meta:
         """Model options."""
 
         ordering = ['last_name', 'first_name']
+
+    def save(self, *args, **kwargs):
+        """Ensure staff flag mirrors administrator role."""
+
+        self.is_staff = self.role == self.Roles.ADMIN
+        super().save(*args, **kwargs)
 
     def full_name(self):
         """Return a string containing the user's full name."""
@@ -38,5 +55,17 @@ class User(AbstractUser):
 
     def mini_gravatar(self):
         """Return a URL to a miniature version of the user's gravatar."""
-        
+
         return self.gravatar(size=60)
+
+    @property
+    def is_admin(self):
+        """Return True when user has administrator role."""
+
+        return self.role == self.Roles.ADMIN
+
+    @property
+    def is_moderator(self):
+        """Return True when user has moderator role."""
+
+        return self.role == self.Roles.MODERATOR

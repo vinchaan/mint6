@@ -6,3 +6,6 @@ from .password_view import *
 from .profile_view import *
 from .sign_up_view import *
 from .create_recipe_view import *
+from .delete_recipe_view import *
+from .delete_user_view import *
+from .flag_user_view import *
