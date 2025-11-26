@@ -3,8 +3,8 @@
 ## Team members
 The members of the team are:
 - Vincent Rey Gutierrez
-- *enter full name 2 here*
-- *enter full name 3 here*
+- *Damla Kose*
+-  Binuli Nevanma Perera Markawitage
 - *enter full name 4 here*
 - *enter full name 5 here (or delete if not applicable)*
 
