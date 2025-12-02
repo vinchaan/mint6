@@ -4,6 +4,8 @@ from django.views.generic.edit import FormView
 from django.urls import reverse
 from recipes.forms import SignUpForm
 from recipes.views.decorators import LoginProhibitedMixin
+from recipes.helpers import log_action
+from recipes.models import AdminLog
 
 
 class SignUpView(LoginProhibitedMixin, FormView):
@@ -30,6 +32,22 @@ class SignUpView(LoginProhibitedMixin, FormView):
         """
         self.object = form.save()
         login(self.request, self.object)
+        
+        # Log the user creation
+        log_action(
+            actor=self.object,
+            action_type=AdminLog.ActionType.USER_CREATED,
+            description=f"New user {self.object.username} signed up",
+            target_type='User',
+            target_id=self.object.id,
+            metadata={
+                'username': self.object.username,
+                'email': self.object.email,
+                'role': self.object.role,
+            },
+            request=self.request,
+        )
+        
         return super().form_valid(form)
 
     def get_success_url(self):

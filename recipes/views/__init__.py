@@ -9,3 +9,5 @@ from .create_recipe_view import *
 from .delete_recipe_view import *
 from .delete_user_view import *
 from .flag_user_view import *
+from .admin_panel_view import *
+from .logs_view import *
