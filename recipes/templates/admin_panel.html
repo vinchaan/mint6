@@ -7,7 +7,7 @@
         <i class="bi bi-shield-check"></i> Admin Panel
       </h1>
       
-      <div class="card">
+      <div class="card mb-4">
         <div class="card-body">
           <h5 class="card-title">Administrative Actions</h5>
           <p class="card-text">Manage and monitor system activities.</p>
@@ -17,6 +17,72 @@
               <i class="bi bi-journal-text"></i> View Logs
             </a>
           </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">User Management</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" action="." class="row g-3 mb-4 align-items-center">
+                <div class="col-auto flex-grow-1">
+                    <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search by username or email...">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                    {% if search_query %}
+                        <a href="{% url 'admin_panel' %}" class="btn btn-outline-secondary">Clear</a>
+                    {% endif %}
+                </div>
+            </form>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>
+                                <a href="?sort=username&q={{ search_query }}" class="text-decoration-none text-dark">
+                                    Username <i class="bi bi-arrow-down-up small text-muted"></i>
+                                </a>
+                            </th>
+                            <th>
+                                <a href="?sort=email&q={{ search_query }}" class="text-decoration-none text-dark">
+                                    Email <i class="bi bi-arrow-down-up small text-muted"></i>
+                                </a>
+                            </th>
+                            <th>
+                                <a href="?sort=date_joined&q={{ search_query }}" class="text-decoration-none text-dark">
+                                    Date Joined <i class="bi bi-arrow-down-up small text-muted"></i>
+                                </a>
+                            </th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td>{{ u.username }}</td>
+                            <td>{{ u.email }}</td>
+                            <td>{{ u.date_joined|date:"M d, Y" }}</td>
+                            <td>
+                                {% if u.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-3">No users found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
       </div>
       

@@ -30,6 +30,9 @@ urlpatterns = [
     path('profile/', views.ProfileUpdateView.as_view(), name='profile'),
     path('sign_up/', views.SignUpView.as_view(), name='sign_up'),
     path('create_recipe/', views.CreateRecipeView.as_view(), name='create_recipe'),
+    
+    #Admin specific delete
+    path('superuser/recipes/<int:recipe_id>/delete/', views.delete_recipe_admin, name='delete_recipe_admin'),
 
     # admin/moderator actions (functionality to be implemented)
     path('recipes/<int:recipe_id>/delete/', views.delete_recipe, name='delete_recipe'),
