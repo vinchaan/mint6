@@ -2,8 +2,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
-from recipes.helpers import can_delete_user
-from recipes.models import User
+from recipes.helpers import can_delete_user, log_action
+from recipes.models import User, AdminLog
 
 
 @login_required
@@ -27,6 +27,21 @@ def delete_user(request, user_id):
     # prevent deleting yourself
     # prevent deleting other admins?
     # check if user has important data that should be preserved?
+    
+    # Log the action
+    log_action(
+        actor=request.user,
+        action_type=AdminLog.ActionType.USER_DELETED,
+        description=f"{request.user.username} deleted user {target_user.username} (ID: {target_user.id})",
+        target_type='User',
+        target_id=target_user.id,
+        metadata={
+            'target_username': target_user.username,
+            'target_email': target_user.email,
+            'target_role': target_user.role,
+        },
+        request=request,
+    )
     
     # TODO: Uncomment when ready to actually delete
     # target_user.delete()

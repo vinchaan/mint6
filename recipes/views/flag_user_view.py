@@ -2,8 +2,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
-from recipes.helpers import can_flag_user_for_deletion
-from recipes.models import User
+from recipes.helpers import can_flag_user_for_deletion, log_action
+from recipes.models import User, AdminLog
 
 
 @login_required
@@ -23,6 +23,21 @@ def flag_user_for_deletion(request, user_id):
     
     # Get the target user object
     target_user = get_object_or_404(User, pk=user_id)
+    
+    # Log the action
+    log_action(
+        actor=request.user,
+        action_type=AdminLog.ActionType.USER_FLAGGED,
+        description=f"{request.user.username} flagged user {target_user.username} (ID: {target_user.id}) for deletion",
+        target_type='User',
+        target_id=target_user.id,
+        metadata={
+            'target_username': target_user.username,
+            'target_email': target_user.email,
+            'target_role': target_user.role,
+        },
+        request=request,
+    )
     
     # TODO: Add a field to User model to track flagged status
     # flagged_for_deletion = models.BooleanField(default=False)

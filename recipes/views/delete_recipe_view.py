@@ -2,8 +2,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
-from recipes.helpers import can_delete_recipe
-from recipes.models import Recipe
+from recipes.helpers import can_delete_recipe, log_action
+from recipes.models import Recipe, AdminLog
 
 
 @login_required
@@ -22,6 +22,21 @@ def delete_recipe(request, recipe_id):
     
     # Gets the recipe object
     recipe = get_object_or_404(Recipe, pk=recipe_id)
+    
+    # Log the action
+    log_action(
+        actor=request.user,
+        action_type=AdminLog.ActionType.RECIPE_DELETED,
+        description=f"{request.user.username} deleted recipe '{recipe.name}' (ID: {recipe.id})",
+        target_type='Recipe',
+        target_id=recipe.id,
+        metadata={
+            'recipe_name': recipe.name,
+            'recipe_author': recipe.author.username if recipe.author else None,
+            'recipe_difficulty': recipe.difficulty,
+        },
+        request=request,
+    )
     
     # TODO: Any additional checks here if needed
     # (e.g., check if recipe is in use, confirmation step, etc.)

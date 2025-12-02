@@ -5,6 +5,8 @@ from django.shortcuts import redirect, render
 from django.views import View
 from recipes.forms import LogInForm
 from recipes.views.decorators import LoginProhibitedMixin
+from recipes.helpers import log_action
+from recipes.models import AdminLog
 
 
 class LogInView(LoginProhibitedMixin, View):
@@ -41,6 +43,13 @@ class LogInView(LoginProhibitedMixin, View):
         user = form.get_user()
         if user is not None:
             login(request, user)
+            # Log the login action
+            log_action(
+                actor=user,
+                action_type=AdminLog.ActionType.USER_LOGIN,
+                description=f"{user.username} logged in",
+                request=request,
+            )
             return redirect(self.next)
         messages.add_message(request, messages.ERROR, "The credentials provided were invalid!")
         return self.render()

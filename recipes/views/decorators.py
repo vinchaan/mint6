@@ -1,6 +1,10 @@
+from functools import wraps
+from typing import Optional, Callable, Any
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import redirect
+from recipes.helpers import log_action
+from recipes.models import AdminLog
 
 
 def login_prohibited(view_function):
@@ -81,3 +85,73 @@ class LoginProhibitedMixin:
             )
         else:
             return self.redirect_when_logged_in_url
+
+
+def log_admin_action(
+    action_type: str,
+    description_template: Optional[str] = None,
+    target_type: Optional[str] = None,
+    get_target_id: Optional[Callable] = None,
+):
+    """
+    Decorator to automatically log admin/moderator actions.
+    
+    Args:
+        action_type: Type of action (from AdminLog.ActionType)
+        description_template: Template string for description (can use {actor}, {target}, etc.)
+        target_type: Type of target object (e.g., 'User', 'Recipe')
+        get_target_id: Optional function to extract target_id from view kwargs
+    
+    Example:
+        @log_admin_action(
+            action_type=AdminLog.ActionType.USER_DELETED,
+            description_template="{actor} deleted user {target}",
+            target_type='User',
+            get_target_id=lambda kwargs: kwargs.get('user_id')
+        )
+        def delete_user(request, user_id):
+            ...
+    """
+    def decorator(view_func: Callable) -> Callable:
+        @wraps(view_func)
+        def wrapper(request, *args, **kwargs):
+            # Execute the view first
+            response = view_func(request, *args, **kwargs)
+            
+            # Extract target_id if function provided
+            target_id = None
+            if get_target_id:
+                try:
+                    target_id = get_target_id(kwargs)
+                except (KeyError, AttributeError):
+                    pass
+            
+            # Generate description
+            if description_template:
+                actor_name = request.user.username if request.user.is_authenticated else 'System'
+                target_name = f"#{target_id}" if target_id else "unknown"
+                description = description_template.format(
+                    actor=actor_name,
+                    target=target_name,
+                    **kwargs
+                )
+            else:
+                description = f"{view_func.__name__} action performed"
+            
+            # Log the action
+            try:
+                log_action(
+                    actor=request.user if request.user.is_authenticated else None,
+                    action_type=action_type,
+                    description=description,
+                    target_type=target_type,
+                    target_id=target_id,
+                    request=request,
+                )
+            except Exception:
+                # Don't let logging errors break the view
+                pass
+            
+            return response
+        return wrapper
+    return decorator

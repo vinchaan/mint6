@@ -5,8 +5,9 @@ from django.urls import reverse
 from django.views.generic import CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from recipes.models import Recipe
+from recipes.models import Recipe, AdminLog
 from recipes.forms.recipe_form import RecipeForm, IngredientFormSet, StepFormSet
+from recipes.helpers import log_action
 
 
 class CreateRecipeView(LoginRequiredMixin, CreateView):
@@ -102,6 +103,21 @@ class CreateRecipeView(LoginRequiredMixin, CreateView):
             f.instance.position = pos
             pos += 1
         step_formset.save()
+
+        # Log the recipe creation
+        log_action(
+            actor=self.request.user,
+            action_type=AdminLog.ActionType.RECIPE_CREATED,
+            description=f"{self.request.user.username} created recipe '{self.object.name}' (ID: {self.object.id})",
+            target_type='Recipe',
+            target_id=self.object.id,
+            metadata={
+                'recipe_name': self.object.name,
+                'recipe_difficulty': self.object.difficulty,
+                'recipe_visibility': self.object.visibility,
+            },
+            request=self.request,
+        )
 
         messages.success(self.request, "Recipe added!")
         return self.redirect_success()

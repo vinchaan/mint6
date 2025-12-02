@@ -1,0 +1,32 @@
+{% extends 'base_content.html' %}
+{% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h1 class="mb-4">
+        <i class="bi bi-shield-check"></i> Admin Panel
+      </h1>
+      
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Administrative Actions</h5>
+          <p class="card-text">Manage and monitor system activities.</p>
+          
+          <div class="d-grid gap-2 d-md-block mt-3">
+            <a href="{% url 'view_logs' %}" class="btn btn-primary btn-lg">
+              <i class="bi bi-journal-text"></i> View Logs
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-4">
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+          <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
