@@ -65,11 +65,7 @@ class CreateRecipeView(LoginRequiredMixin, CreateView):
                 "step_formset": step_formset,
             })
 
-        if (
-            form.is_valid()
-            and ingredient_formset.is_valid()
-            and step_formset.is_valid()
-        ):
+        if  (form.is_valid() and ingredient_formset.is_valid() and step_formset.is_valid()):
             return self._save_all(form, ingredient_formset, step_formset)
 
         return self.render_to_response({
@@ -79,11 +75,11 @@ class CreateRecipeView(LoginRequiredMixin, CreateView):
         })
 
     def _save_all(self, form, ingredient_formset, step_formset):
-   
+        
+        
         form.instance.author = self.request.user
         self.object = form.save(commit=False)
         self.object.save()
-
         form.save_m2m()
 
         ingredient_formset.instance = self.object
@@ -104,7 +100,6 @@ class CreateRecipeView(LoginRequiredMixin, CreateView):
             pos += 1
         step_formset.save()
 
-        # Log the recipe creation
         log_action(
             actor=self.request.user,
             action_type=AdminLog.ActionType.RECIPE_CREATED,
@@ -115,14 +110,20 @@ class CreateRecipeView(LoginRequiredMixin, CreateView):
                 'recipe_name': self.object.name,
                 'recipe_difficulty': self.object.difficulty,
                 'recipe_visibility': self.object.visibility,
+                'tags': list(self.object.tags.values_list('name', flat=True)),
             },
             request=self.request,
         )
 
-        messages.success(self.request, "Recipe added!")
+        messages.success(self.request, f"Recipe '{self.object.name}' created successfully!")
         return self.redirect_success()
 
     def redirect_success(self):
+        """
+        After successful save, redirect to a fresh form.
+        You might want to redirect to the recipe detail page instead:
+        return redirect('recipe_detail', pk=self.object.pk)
+        """
         return self.render_to_response({
             "form": self.form_class(),
             "ingredient_formset": IngredientFormSet(prefix="ingredients"),

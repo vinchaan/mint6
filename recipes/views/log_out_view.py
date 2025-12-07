@@ -7,7 +7,6 @@ from recipes.models import AdminLog
 def log_out(request):
     """Log out the current user"""
     
-    # Log the logout action before logging out
     if request.user.is_authenticated:
         log_action(
             actor=request.user,
