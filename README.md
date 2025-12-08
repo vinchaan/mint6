@@ -3,10 +3,10 @@
 ## Team members
 The members of the team are:
 - Vincent Rey Gutierrez
-- *Damla Kose*
--  Binuli Nevanma Perera Markawitage
-- *enter full name 4 here*
-- *enter full name 5 here (or delete if not applicable)*
+- Damla Kose
+- Binuli Nevanma Perera Markawitage
+- Rahima Meriam Oqubay
+- Gor Vardanyan
 
 ## Project structure
 The project is called `recipify`.  It currently consists of a single app `recipes`.
