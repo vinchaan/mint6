@@ -153,8 +153,12 @@ class Command(BaseCommand):
 
         Runs the full seeding workflow and stores ``self.users`` for any
         post-processing or debugging (not required for operation).
+        First creates admin and moderator users. Then creates tags, users, recipes, ratings and favourites.
         """
+        
+
         self.stdout.write("Starting database seeding...")
+        self.create_staff()
         self.create_tags()
         self.create_users()
         self.create_recipes()
@@ -162,6 +166,21 @@ class Command(BaseCommand):
         self.users = User.objects.all()
         self.recipes = Recipe.objects.all()
         self.stdout.write(self.style.SUCCESS(f"Seeding complete! {self.users.count()} users, {self.recipes.count()} recipes, {Tag.objects.count()} tags"))
+
+    def create_staff(self):
+        self.admin_user = User.objects.create_user(
+            username='@admin',            
+            email='admin@test.com',
+            password='Password123',
+            role=User.Roles.ADMIN,
+        )
+
+        self.moderator_user = User.objects.create_user(
+            username='@moderator',
+            email='moderator@test.com',
+            password='Password123',
+            role=User.Roles.MODERATOR,
+        )
 
 
     def create_users(self):

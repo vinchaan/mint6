@@ -115,10 +115,8 @@ def log_admin_action(
     def decorator(view_func: Callable) -> Callable:
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
-            # Execute the view first
             response = view_func(request, *args, **kwargs)
             
-            # Extract target_id if function provided
             target_id = None
             if get_target_id:
                 try:
@@ -126,7 +124,6 @@ def log_admin_action(
                 except (KeyError, AttributeError):
                     pass
             
-            # Generate description
             if description_template:
                 actor_name = request.user.username if request.user.is_authenticated else 'System'
                 target_name = f"#{target_id}" if target_id else "unknown"
@@ -138,7 +135,6 @@ def log_admin_action(
             else:
                 description = f"{view_func.__name__} action performed"
             
-            # Log the action
             try:
                 log_action(
                     actor=request.user if request.user.is_authenticated else None,
@@ -149,7 +145,6 @@ def log_admin_action(
                     request=request,
                 )
             except Exception:
-                # Don't let logging errors break the view
                 pass
             
             return response
