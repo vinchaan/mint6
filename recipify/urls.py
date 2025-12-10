@@ -31,6 +31,7 @@ urlpatterns = [
     path('sign_up/', views.SignUpView.as_view(), name='sign_up'),
     path('create_recipe/', views.CreateRecipeView.as_view(), name='create_recipe'),
     path('search_user/', views.search_user, name='search_user'),
+    path('search_recipe/', views.search_recipe, name='search_recipe'),
     
     #Admin specific delete
     path('superuser/recipes/<int:recipe_id>/delete/', views.delete_recipe_admin, name='delete_recipe_admin'),

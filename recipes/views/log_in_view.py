@@ -43,7 +43,6 @@ class LogInView(LoginProhibitedMixin, View):
         user = form.get_user()
         if user is not None:
             login(request, user)
-            # Log the login action
             log_action(
                 actor=user,
                 action_type=AdminLog.ActionType.USER_LOGIN,

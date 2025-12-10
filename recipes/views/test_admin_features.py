@@ -9,14 +9,14 @@ class AdminFeatureTests(TestCase):
         self.admin_user = User.objects.create_superuser(
             username='admin', 
             email='admin@test.com', 
-            password='password123'
+            password='Password123'
         )
         
         # 2. Create a Regular User
         self.regular_user = User.objects.create_user(
             username='regular', 
             email='regular@test.com', 
-            password='password123'
+            password='Password123'
         )
 
         # 3. Create a Recipe 
@@ -34,7 +34,7 @@ class AdminFeatureTests(TestCase):
     # Testing Admin Delete Function
     def test_admin_can_delete_recipe(self):
         """Test that an admin can delete any recipe."""
-        self.client.login(username='admin', password='password123')
+        self.client.login(username='admin', password='Password123')
         
         url = reverse('delete_recipe_admin', args=[self.recipe.id])
         response = self.client.get(url) 
@@ -44,7 +44,7 @@ class AdminFeatureTests(TestCase):
 
     def test_regular_user_cannot_delete_via_admin_url(self):
         """Test that a regular user CANNOT use the admin delete URL."""
-        self.client.login(username='regular', password='password123')
+        self.client.login(username='regular', password='Password123')
         
         url = reverse('delete_recipe_admin', args=[self.recipe.id])
         response = self.client.get(url)
@@ -54,7 +54,7 @@ class AdminFeatureTests(TestCase):
     # Testing Search User Function
     def test_admin_search_user(self):
         """Test that searching for a user returns the correct result."""
-        self.client.login(username='admin', password='password123')
+        self.client.login(username='admin', password='Password123')
         
         url = reverse('admin_panel') + '?q=regular'
         response = self.client.get(url)
@@ -67,7 +67,7 @@ class AdminFeatureTests(TestCase):
         """Test that sorting users works."""
         User.objects.create_user(username='zara', email='zara@test.com', password='pw')
         
-        self.client.login(username='admin', password='password123')
+        self.client.login(username='admin', password='Password123')
         
         url = reverse('admin_panel') + '?sort=username'
         response = self.client.get(url)

@@ -14,3 +14,4 @@ from .logs_view import *
 from .delete_recipe_view import delete_recipe_admin
 from .admin_panel_view import admin_panel
 from .search_user_view import *
+from .search_recipe_view import search_recipe
