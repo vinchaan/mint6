@@ -3,7 +3,6 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from recipes.models import Recipe
 
-# --- Helper to allow mocking in tests ---
 def check_admin(user):
     return user.is_superuser
 
