@@ -1,6 +1,8 @@
 from django.conf import settings
 from django.db import models
 from .recipe_tag import Tag
+from django.db.models import Avg, Count
+
 
 class Recipe(models.Model):
 

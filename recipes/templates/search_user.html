@@ -1,5 +1,5 @@
-{% extends 'base.html' %}
-{% block body %}
+{% extends 'base_content.html' %}
+{% block content %}
 
     <h1>Find another user</h1>
 
@@ -16,7 +16,7 @@
             <ul>
                 {% for user in results %}
                     <li>
-                        {% include "partials/user_avatar.html" %}
+                        {% include "partials/user_avatar.html" with user=user %}
                         {{ user.username }}
                     </li>
                 {% endfor %}
@@ -25,4 +25,5 @@
             <p>No users found</p>
         {% endif %}
     {% endif %}
+
 {% endblock %}

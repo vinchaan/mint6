@@ -11,6 +11,7 @@ from faker import Faker
 from faker_food import FoodProvider
 from random import randint, random, choice, sample
 from datetime import timedelta
+from django.utils import timezone
 from django.core.management.base import BaseCommand, CommandError
 from recipes.models import (
     Recipe,
@@ -20,11 +21,11 @@ from recipes.models import (
     RecipeFavourite,
     Tag,
     User,
+    AdminLog
 )
 
 
 user_fixtures = [
-    {'username': '@johndoe', 'email': 'john.doe@example.org', 'first_name': 'John', 'last_name': 'Doe'},
     {'username': '@janedoe', 'email': 'jane.doe@example.org', 'first_name': 'Jane', 'last_name': 'Doe'},
     {'username': '@charlie', 'email': 'charlie.johnson@example.org', 'first_name': 'Charlie', 'last_name': 'Johnson'},
 ]
@@ -156,31 +157,42 @@ class Command(BaseCommand):
         First creates admin and moderator users. Then creates tags, users, recipes, ratings and favourites.
         """
         
-
+        
         self.stdout.write("Starting database seeding...")
         self.create_staff()
         self.create_tags()
         self.create_users()
         self.create_recipes()
         self.create_ratings_and_favourites()
+        self.create_admin_logs()
+
         self.users = User.objects.all()
         self.recipes = Recipe.objects.all()
+        self.create_admin_logs()
+
         self.stdout.write(self.style.SUCCESS(f"Seeding complete! {self.users.count()} users, {self.recipes.count()} recipes, {Tag.objects.count()} tags"))
 
     def create_staff(self):
         try: 
-            self.admin_user = User.objects.create_user(
+            self.admin_user1 = User.objects.create_user(
                 username='@admin',            
                 email='admin@test.com',
                 password='Password123',
-                role=User.Roles.ADMIN,
+                role=User.Roles.ADMIN
+            )
+
+            self.admin_user2 = User.objects.create_user(
+                username='@johndoe',            
+                email='johndoe@gmail.com',
+                password='Password123',
+                role=User.Roles.ADMIN
             )
 
             self.moderator_user = User.objects.create_user(
                 username='@moderator',
                 email='moderator@test.com',
                 password='Password123',
-                role=User.Roles.MODERATOR,
+                role=User.Roles.MODERATOR
             )
         except Exception as e:
             self.stdout.write(self.style.WARNING(f"Did not generate admin and moderator due to already being generated."))
@@ -375,6 +387,116 @@ class Command(BaseCommand):
                 text=step_text,
                 position=position,
             )
+    
+    def create_admin_logs(self):
+        if AdminLog.objects.filter(metadata__seed=True).exists():
+            return
+
+        users = list(User.objects.all())
+        recipes = list(Recipe.objects.all())
+        now = timezone.now()
+
+        if not users:
+            return
+
+        user_agents = [
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/120 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36",
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/120 Safari/537.36",
+        ]
+
+        def rand_ip():
+            return f"{randint(1,223)}.{randint(0,255)}.{randint(0,255)}.{randint(1,254)}"
+
+        def rand_ts(days=30):
+            return now - timedelta(seconds=randint(0, days * 24 * 3600))
+
+        def log(actor, action_type, target=None, target_type="", desc="", meta=None):
+            AdminLog.objects.create(
+                actor=actor,
+                action_type=action_type,
+                target_type=target_type or (target.__class__.__name__ if target else ""),
+                target_id=getattr(target, "id", None),
+                description=desc,
+                metadata={"seed": True, **(meta or {})},
+                ip_address=rand_ip(),
+                user_agent=choice(user_agents),
+                timestamp=rand_ts(),
+            )
+
+        admin = getattr(self, "admin_user1", None)
+        admin2 = getattr(self, "admin_user2", None)
+        moderator = getattr(self, "moderator_user", None)
+
+        for u in users:
+            if u.username in {"@admin", "@johndoe", "@moderator", "@janedoe", "@charlie"} or random() < 0.15:
+                log(
+                    admin,
+                    AdminLog.ActionType.USER_CREATED,
+                    target=u,
+                    target_type="User",
+                    desc=f"User account created for {u.username}.",
+                    meta={"username": u.username, "email": u.email},
+                )
+
+        for u in sample(users, k=min(len(users), 60)):
+            log(u, AdminLog.ActionType.USER_LOGIN, target=u, target_type="User", desc=f"{u.username} logged in.")
+            if random() < 0.75:
+                log(u, AdminLog.ActionType.USER_LOGOUT, target=u, target_type="User", desc=f"{u.username} logged out.")
+
+        for r in recipes:
+            log(
+                r.author,
+                AdminLog.ActionType.RECIPE_CREATED,
+                target=r,
+                target_type="Recipe",
+                desc=f"Recipe '{r.name}' created by {r.author.username}.",
+                meta={"recipe_name": r.name, "visibility": r.visibility},
+            )
+
+        for r in sample(recipes, k=min(len(recipes), 25)):
+            log(
+                r.author,
+                AdminLog.ActionType.RECIPE_UPDATED,
+                target=r,
+                target_type="Recipe",
+                desc=f"Recipe '{r.name}' updated.",
+                meta={"fields_changed": sample(["description", "tags", "visibility"], k=randint(1, 3))},
+            )
+
+        if admin:
+            for u in sample([x for x in users if x.username not in {"@admin"}], k=min(len(users)-1, 12)):
+                log(
+                    admin,
+                    AdminLog.ActionType.ADMIN_ACTION,
+                    target=u,
+                    target_type="User",
+                    desc=f"Admin reviewed user {u.username}.",
+                    meta={"action": choice(["warned", "noted", "no_action"])},
+                )
+
+        if admin2 and recipes:
+            for r in sample(recipes, k=min(len(recipes), 10)):
+                log(
+                    admin2,
+                    AdminLog.ActionType.ADMIN_ACTION,
+                    target=r,
+                    target_type="Recipe",
+                    desc=f"Admin audit on recipe '{r.name}'.",
+                    meta={"action": choice(["feature", "no_action", "request_edit"])},
+                )
+
+        if moderator and recipes:
+            for r in sample(recipes, k=min(len(recipes), 12)):
+                log(
+                    moderator,
+                    AdminLog.ActionType.MODERATOR_ACTION,
+                    target=r,
+                    target_type="Recipe",
+                    desc=f"Moderator reviewed recipe '{r.name}'.",
+                    meta={"outcome": choice(["no_action", "hide_recipe", "warn_author"])},
+                )
+
        
     def try_create_user(self, data):
         """
