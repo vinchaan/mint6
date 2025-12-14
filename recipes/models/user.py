@@ -29,6 +29,11 @@ class User(AbstractUser):
         default=Roles.USER,
         help_text='Used to determine what level of authority the user has in the UI.'
     )
+    following = models.ManyToManyField(
+        "self",
+        symmetrical=False,
+        related_name="followers"
+    )
 
     class Meta:
         """Model options."""
