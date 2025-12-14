@@ -1,7 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse
 from recipes.helpers import can_flag_user_for_deletion, log_action
 from recipes.models import User, AdminLog
 
@@ -39,19 +38,9 @@ def flag_user_for_deletion(request, user_id):
         request=request,
     )
     
-    # TODO: Add a field to User model to track flagged status
-    # flagged_for_deletion = models.BooleanField(default=False)
-
-    # after that uncomment below
-
-    # target_user.flagged_for_deletion = True
-    # target_user.save()
-    # messages.success(request, f"User '{target_user.username}' has been flagged for deletion.")
-    
-    # For now, just redirect (skeleton code)
-    messages.info(request, f"Flagging user '{target_user.username}' for deletion would happen here.")
-    return redirect('dashboard')
-    
-    # TODO: Redirecting to a user management page
-    # return redirect(reverse('user_list'))  # if you have a user list view
+    # Flag the user for deletion
+    target_user.flagged_for_deletion = True
+    target_user.save()
+    messages.success(request, f"User '{target_user.username}' has been flagged for deletion.")
+    return redirect('home')
 
