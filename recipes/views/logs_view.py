@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect
 from recipes.helpers import is_admin, is_moderator
-from recipes.models import AdminLog
+from recipes.models import AdminLog, User
 
 
 @login_required
@@ -54,6 +54,11 @@ def view_logs(request):
         except (ValueError, TypeError):
             actor_filter = ''
     
+    # Filter by actor role (permission level)
+    role_filter = request.GET.get('role', '')
+    if role_filter:
+        logs = logs.filter(actor__role=role_filter)
+    
     # Date range filtering
     date_from = request.GET.get('date_from', '')
     date_to = request.GET.get('date_to', '')
@@ -80,12 +85,14 @@ def view_logs(request):
         'action_type_filter': action_type_filter,
         'target_type_filter': target_type_filter,
         'actor_filter': actor_filter,
+        'role_filter': role_filter,
         'date_from': date_from,
         'date_to': date_to,
         'action_types': action_types,
         'target_types': target_types,
         'actors': actors,
         'action_type_choices': AdminLog.ActionType.choices,
+        'role_choices': User.Roles.choices,
     }
     
     return render(request, 'logs.html', context)

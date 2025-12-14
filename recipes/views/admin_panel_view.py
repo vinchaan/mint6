@@ -2,11 +2,11 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from django.contrib.auth import get_user_model  # <--- CHANGED IMPORT
+from django.contrib.auth import get_user_model 
 from recipes.helpers import is_admin, is_moderator
 
 # Get the correct User model (recipes.User) instead of the default auth.User
-User = get_user_model()  # <--- ADDED THIS LINE
+User = get_user_model() 
 
 @login_required
 def admin_panel(request):
@@ -38,8 +38,6 @@ def admin_panel(request):
     
     if sort_param in valid_sort_fields:
         users = users.order_by(sort_param)
-
-    # --- END NEW CODE ---
     
     return render(request, 'admin_panel.html', {
         'user': request.user,
