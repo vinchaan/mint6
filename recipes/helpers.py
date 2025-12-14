@@ -4,9 +4,9 @@ from recipes.models import User, AdminLog
 
 
 def is_admin(user: User) -> bool:
-    """Return True if the user has the admin role."""
+    """Return True if the user has the admin role or is a superuser."""
 
-    return bool(user and user.is_authenticated and user.is_admin)
+    return bool(user and user.is_authenticated and (user.is_admin or user.is_superuser))
 
 
 def is_moderator(user: User) -> bool:

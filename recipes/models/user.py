@@ -34,6 +34,10 @@ class User(AbstractUser):
         symmetrical=False,
         related_name="followers"
     )
+    flagged_for_deletion = models.BooleanField(
+        default=False,
+        help_text='Whether this user has been flagged for deletion by a moderator or admin'
+    )
 
     class Meta:
         """Model options."""
@@ -41,9 +45,11 @@ class User(AbstractUser):
         ordering = ['last_name', 'first_name']
 
     def save(self, *args, **kwargs):
-        """Ensure staff flag mirrors administrator role."""
+        """Ensure staff and superuser flags mirror the user role."""
 
-        self.is_staff = self.role == self.Roles.ADMIN
+        self.is_staff = self.role in {self.Roles.ADMIN, self.Roles.MODERATOR}
+        self.is_superuser = self.role == self.Roles.ADMIN
+
         super().save(*args, **kwargs)
 
     def full_name(self):
