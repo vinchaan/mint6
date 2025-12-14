@@ -1,7 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
-from django.urls import reverse
 from recipes.helpers import can_delete_user, log_action
 from recipes.models import User, AdminLog
 
@@ -23,10 +22,16 @@ def delete_user(request, user_id):
     # Gets the target user object
     target_user = get_object_or_404(User, pk=user_id)
     
-    # TODO: Safety checks
-    # prevent deleting yourself
-    # prevent deleting other admins?
-    # check if user has important data that should be preserved?
+    # Safety checks
+    # Prevent deleting yourself
+    if request.user.id == target_user.id:
+        messages.error(request, "You cannot delete your own account.")
+        return redirect('dashboard')
+    
+    # Prevent deleting other admins
+    if target_user.is_admin:
+        messages.error(request, "You cannot delete other admin accounts.")
+        return redirect('dashboard')
     
     # Log the action
     log_action(
@@ -43,14 +48,8 @@ def delete_user(request, user_id):
         request=request,
     )
     
-    # TODO: Uncomment when ready to actually delete
-    # target_user.delete()
-    # messages.success(request, f"User '{target_user.username}' has been deleted.")
-    
-    # For now, just redirect (skeleton code)
-    messages.info(request, f"User deletion for '{target_user.username}' would happen here.")
-    return redirect('dashboard')
-    
-    # TODO: Redirecting to a user management page
-    # return redirect(reverse('user_list'))  # if you have a user list view
+    # Delete the user
+    target_user.delete()
+    messages.success(request, f"User '{target_user.username}' has been deleted.")
+    return redirect('home')
 

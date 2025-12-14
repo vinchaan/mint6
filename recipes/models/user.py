@@ -34,6 +34,10 @@ class User(AbstractUser):
         symmetrical=False,
         related_name="followers"
     )
+    flagged_for_deletion = models.BooleanField(
+        default=False,
+        help_text='Whether this user has been flagged for deletion by a moderator or admin'
+    )
 
     class Meta:
         """Model options."""

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from recipes.models import AdminLog
+from recipes.models import AdminLog, User
 
 
 @admin.register(AdminLog)
@@ -112,4 +112,4 @@ class AdminLogAdmin(admin.ModelAdmin):
     
     def has_delete_permission(self, request, obj=None):
         """Only allow admins to delete logs."""
-        return request.user.is_superuser
+        return request.user.is_authenticated and request.user.is_admin
