@@ -22,7 +22,9 @@ class RecipeRating(models.Model):
 
     class Meta: 
         unique_together=("recipe", "user")
-
     
     def __str__(self):
         return f"{self.rating}★ on {self.recipe} by {self.user}"
+
+    def returnRating(self):
+        return self.rating
