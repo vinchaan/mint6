@@ -59,10 +59,24 @@ class Recipe(models.Model):
     updatedAt = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        prep = self.prepTime
-        cook = self.cookTime
-        self.totalTime = prep+cook
+        self.totalTime = self.prepTime + self.cookTime
         super().save(*args, **kwargs)
+    
+    def update_rating_stats(self):
+        """Recalculate and save rating statistics."""
+        stats = self.ratings.aggregate(
+            avg=Avg('rating'),
+            count=Count('id')
+        )
+        self.averageRating = stats['avg'] or 0
+        self.ratingCount = stats['count']
+        self.save(update_fields=['averageRating', 'ratingCount'])
+    
+    def update_favourite_count(self):
+        """Recalculate and save favourites count."""
+        self.favouritesCount = self.favourites.count()
+        self.save(update_fields=['favouritesCount'])
+
 
     def __str__(self):
         return self.name

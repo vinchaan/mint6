@@ -168,19 +168,22 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f"Seeding complete! {self.users.count()} users, {self.recipes.count()} recipes, {Tag.objects.count()} tags"))
 
     def create_staff(self):
-        self.admin_user = User.objects.create_user(
-            username='@admin',            
-            email='admin@test.com',
-            password='Password123',
-            role=User.Roles.ADMIN,
-        )
+        try: 
+            self.admin_user = User.objects.create_user(
+                username='@admin',            
+                email='admin@test.com',
+                password='Password123',
+                role=User.Roles.ADMIN,
+            )
 
-        self.moderator_user = User.objects.create_user(
-            username='@moderator',
-            email='moderator@test.com',
-            password='Password123',
-            role=User.Roles.MODERATOR,
-        )
+            self.moderator_user = User.objects.create_user(
+                username='@moderator',
+                email='moderator@test.com',
+                password='Password123',
+                role=User.Roles.MODERATOR,
+            )
+        except Exception as e:
+            self.stdout.write(self.style.WARNING(f"Did not generate admin and moderator due to already being generated."))
 
 
     def create_users(self):
@@ -215,7 +218,6 @@ class Command(BaseCommand):
         all_users = list(User.objects.all())
         
         if not all_users or not all_recipes:
-            self.stdout.write(self.style.WARNING("Not enough users or recipes to create ratings"))
             return
         
         for recipe in all_recipes:
