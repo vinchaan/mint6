@@ -5,10 +5,22 @@
     <div class="col-12">
       <h1>Edit profile</h1>
       <form action="{% url 'profile' %}" method="post">
-        {% csrf_token %}
         {% include 'partials/bootstrap_form.html' with form=form %}
         <input type="submit" value="Update" class="btn btn-primary">
       </form>
+        <div class="col-12">
+            {% csrf_token %}
+          {% if request.user in profile_user.followers.all %}
+            <button type="submit" class="btn btn-outline-danger">
+                Unfollow
+            </button>
+            {% else %}
+            <button type="submit" class="btn btn-primary">
+                Follow
+            </button>
+            {% endif %}
+        
+        </div>
     </div>
   </div>
 </div>

@@ -19,6 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path
 from recipes import views
+from .views import index, profile, follow_user
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,7 +33,8 @@ urlpatterns = [
     path('create_recipe/', views.CreateRecipeView.as_view(), name='create_recipe'),
     path('search_user/', views.search_user, name='search_user'),
     path('search_recipe/', views.search_recipe, name='search_recipe'),
-    
+    path('follow/<int:pk>/', views.follow_user, name='follow_user'),
+
     #Admin specific delete
     path('superuser/recipes/<int:recipe_id>/delete/', views.delete_recipe_admin, name='delete_recipe_admin'),
 
