@@ -100,8 +100,8 @@
                 {% if user.is_admin or user.is_moderator %}
                   <div class="mt-2">
                     {% include 'admin_actions.html' with recipe=recipe %}
-                  </div>
-                {% endif %}
+                  {% endif %}
+                </div>
               </div>
             </div>
           </div>
