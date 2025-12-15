@@ -16,7 +16,7 @@ The project is called `recipify`. It currently consists of a single app `recipes
 
 ## Deployed version of the application
 
-The deployed version of the application can be found at [*enter url here*](*enter_url_here*).
+The deployed version of the application can be found at https://mint6.pythonanywhere.com
 
 ## Installation instructions
 
