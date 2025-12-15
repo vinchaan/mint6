@@ -19,4 +19,5 @@ from .view_recipe_view import view_recipe
 from .view_profile_view import view_profile
 from .favourite_recipe_view import favourite_recipe
 from .add_rating_view import add_rating
+from .favourites_view import favourites
 
