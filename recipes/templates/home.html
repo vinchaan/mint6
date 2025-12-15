@@ -1,23 +1,89 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block body %}
-  <div class="container vh-100">
-    <div class="row h-100">
-      <div class="col-12 my-auto">
-        <div class="card cover-card offset-sm-2 offset-md-4 offset-lg-7">
-          <h1 class="cover-heading">Recipify</h1>
-          <p class="cover-text">A recipe sharing app by Team <i>Mint-6</i></p>
-          <p>
-            <a href='{% url 'sign_up' %}' class="btn btn-lg btn-secondary">
-              Sign up
-            </a>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --theme-lilac: #C8A2C8;
+        --theme-text: #333333;
+    }
+
+    .brand-font {
+        font-family: 'Playfair Display', serif;
+        color: var(--theme-lilac);
+        font-weight: 400;
+        letter-spacing: 1px;
+    }
+
+    .script-font {
+        font-family: 'Caveat', cursive;
+        color: var(--theme-lilac);
+        font-size: 1.5em;
+    }
+
+    .btn-lilac {
+        background-color: white;
+        color: var(--theme-text);
+        border: 1px solid #ccc;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 2px;
+        font-weight: bold;
+        padding: 10px 20px;
+        transition: all 0.3s;
+    }
+    .btn-lilac:hover {
+        background-color: var(--theme-lilac);
+        color: white;
+        border-color: var(--theme-lilac);
+    }
+</style>
+  <section class="landing">
+    <div class="collage">
+      <div class="collage-row row-1">
+        <div class="collage-item img1"></div>
+        <div class="collage-item img2"></div>
+        <div class="collage-item img3"></div>
+        <div class="collage-item img4"></div>
+        <div class="collage-item img5"></div>
+        <div class="collage-item img6"></div>
+        <div class="collage-item img1"></div>
+        <div class="collage-item img2"></div>
+        <div class="collage-item img3"></div>
+        <div class="collage-item img4"></div>
+        <div class="collage-item img5"></div>
+        <div class="collage-item img6"></div>
+      </div>
+      <div class="collage-row row-2">
+        <div class="collage-item img7"></div>
+        <div class="collage-item img8"></div>
+        <div class="collage-item img9"></div>
+        <div class="collage-item img10"></div>
+        <div class="collage-item img11"></div>
+        <div class="collage-item img12"></div>
+        <div class="collage-item img7"></div>
+        <div class="collage-item img8"></div>
+        <div class="collage-item img9"></div>
+        <div class="collage-item img10"></div>
+        <div class="collage-item img11"></div>
+        <div class="collage-item img12"></div>
+      </div>
+    </div>
+    <div class="overlay"></div>
+    <div class="container position-relative">
+      <div class="d-flex justify-content-center align-items-center min-vh-100">
+        <div class="landing-card text-center">
+          <p class="text-uppercase mb-1" style="letter-spacing: 2px; font-size: 0.9rem; font-weight: bold; color: #333;">Welcome to</p>
+          <h1 class="display-4 brand-font mb-2">recipify</h1>
+          <p class="lead mb-4" style="letter-spacing: 2px; font-size: 0.9rem; font-weight: bold; color: #333;">
+            A recipe sharing app by Team <span class="script-font">Mint-6</span>
           </p>
-          <p>
-            <a href='{% url 'log_in' %}' class="btn btn-lg btn-secondary">
-              Log in
-            </a>
-          </p>
+          <div class="d-grid gap-2">
+            <a href="{% url 'sign_up' %}" class="btn btn-lilac btn-lg">Sign up</a>
+            <a href="{% url 'log_in' %}" class="btn btn-lilac btn-lg">Log in</a>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 {% endblock %}
