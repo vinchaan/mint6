@@ -133,6 +133,85 @@
 </div>
 
 <style>
+  :root {
+    --theme-lilac: #C8A2C8;
+    --theme-lilac-dark: #8b6fa8;
+  }
+
+  /* Make input fields and textareas stand out with white background */
+  .recipe-details .form-control,
+  .recipe-details input[type="text"],
+  .recipe-details input[type="number"],
+  .recipe-details input[type="time"],
+  .recipe-details select,
+  .recipe-details textarea,
+  .ingredients-section .form-control,
+  .ingredients-section input[type="text"],
+  .steps-section .form-control,
+  .steps-section textarea {
+    background-color: #ffffff !important;
+    border: 1px solid #dee2e6;
+    color: #333333;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .recipe-details .form-control:focus,
+  .recipe-details input[type="text"]:focus,
+  .recipe-details input[type="number"]:focus,
+  .recipe-details input[type="time"]:focus,
+  .recipe-details select:focus,
+  .recipe-details textarea:focus,
+  .ingredients-section .form-control:focus,
+  .ingredients-section input[type="text"]:focus,
+  .steps-section .form-control:focus,
+  .steps-section textarea:focus {
+    background-color: #ffffff !important;
+    border-color: var(--theme-lilac);
+    box-shadow: 0 0 0 0.2rem rgba(200, 162, 200, 0.25);
+    color: #333333;
+    outline: none;
+  }
+
+  /* Ensure textareas have white background */
+  textarea.form-control {
+    background-color: #ffffff !important;
+    color: #333333;
+  }
+
+  textarea.form-control:focus {
+    background-color: #ffffff !important;
+    border-color: var(--theme-lilac);
+    box-shadow: 0 0 0 0.2rem rgba(200, 162, 200, 0.25);
+    color: #333333;
+  }
+
+  /* Style select dropdowns */
+  select.form-control,
+  select.form-select {
+    background-color: #ffffff !important;
+    color: #333333;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23333' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+  }
+
+  select.form-control:focus,
+  select.form-select:focus {
+    background-color: #ffffff !important;
+    border-color: var(--theme-lilac);
+    color: #333333;
+  }
+
+  /* Style input groups for ingredients */
+  .input-group .form-control {
+    background-color: #ffffff !important;
+    color: #333333;
+  }
+
+  .input-group .form-control:focus {
+    background-color: #ffffff !important;
+    border-color: var(--theme-lilac);
+    color: #333333;
+  }
+
   .tags-checkbox-list label {
     display: inline-block;
     margin-right: 15px;
@@ -141,6 +220,17 @@
   
   .tags-checkbox-list input[type="checkbox"] {
     margin-right: 5px;
+  }
+
+  /* Add subtle background to form sections */
+  .recipe-details,
+  .ingredients-section,
+  .steps-section,
+  .tags-section {
+    background-color: #faf8fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
   }
 </style>
 {% endblock %}

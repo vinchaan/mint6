@@ -34,6 +34,9 @@ urlpatterns = [
     path('search_user/', views.search_user, name='search_user'),
     path('search_recipe/', views.search_recipe, name='search_recipe'),
     path("recipes/<int:recipe_id>/", views.view_recipe, name="view_recipe"),
+    path("users/<int:user_id>/profile/", views.view_profile, name="view_profile"),
+    path("recipes/<int:recipe_id>/favourite/", views.favourite_recipe, name="favourite_recipe"),
+    path("recipes/<int:recipe_id>/rate/", views.add_rating, name="add_rating"),
 
     
     #Admin specific delete
