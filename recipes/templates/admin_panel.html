@@ -1,5 +1,17 @@
 {% extends 'base_content.html' %}
 {% block content %}
+<style>
+  .tab-content-section {
+    display: none;
+  }
+  .tab-content-section.active {
+    display: block;
+  }
+  .nav-tabs .nav-link {
+    cursor: pointer;
+  }
+</style>
+
 <div class="container mt-4">
   <div class="row">
     <div class="col-12">
@@ -10,81 +22,275 @@
       <div class="card mb-4">
         <div class="card-body">
           <h5 class="card-title">Administrative Actions</h5>
-          <p class="card-text">Manage and monitor system activities.</p>
+          <p class="card-text">
+            {% if user.is_admin %}
+              Full administrative access - manage users, recipes, and view all logs.
+            {% elif user.is_moderator %}
+              Moderator access - flag users, delete recipes, and view activity logs.
+            {% endif %}
+          </p>
           
-          <div class="d-grid gap-2 d-md-block mt-3">
-            <a href="{% url 'view_logs' %}" class="btn btn-primary btn-lg">
+          <div class="d-grid gap-2 d-md-flex mt-3">
+            {# View Logs - Available to both admins and moderators #}
+            <a href="{% url 'view_logs' %}" class="btn btn-primary btn-lg me-2">
               <i class="bi bi-journal-text"></i> View Logs
             </a>
           </div>
         </div>
       </div>
 
-      <div class="card">
-        <div class="card-header bg-light">
-            <h5 class="mb-0">User Management</h5>
-        </div>
-        <div class="card-body">
+      {# Tab Navigation #}
+      <ul class="nav nav-tabs mb-3" id="adminTabs" role="tablist">
+        {% if user.is_admin %}
+        <li class="nav-item" role="presentation">
+          <button class="nav-link {% if active_tab == 'users' %}active{% endif %}" 
+                  id="users-tab" 
+                  onclick="switchTab('users')"
+                  type="button">
+            <i class="bi bi-people"></i> User Management
+            <span class="badge bg-danger ms-2">Admin Only</span>
+          </button>
+        </li>
+        {% endif %}
+        <li class="nav-item" role="presentation">
+          <button class="nav-link {% if active_tab == 'recipes' %}active{% endif %}" 
+                  id="recipes-tab" 
+                  onclick="switchTab('recipes')"
+                  type="button">
+            <i class="bi bi-book"></i> Recipe Management
+          </button>
+        </li>
+      </ul>
+
+      {# User Management Tab - Admins Only #}
+      {% if user.is_admin %}
+      <div id="users-section" class="tab-content-section {% if active_tab == 'users' %}active{% endif %}">
+        <div class="card">
+          <div class="card-header bg-light">
+            <h5 class="mb-0">
+              <i class="bi bi-people"></i> User Management
+            </h5>
+          </div>
+          <div class="card-body">
             <form method="get" action="." class="row g-3 mb-4 align-items-center">
-                <div class="col-auto flex-grow-1">
-                    <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search by username or email...">
-                </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-search"></i> Search
-                    </button>
-                    {% if search_query %}
-                        <a href="{% url 'admin_panel' %}" class="btn btn-outline-secondary">Clear</a>
-                    {% endif %}
-                </div>
+              <input type="hidden" name="tab" value="users">
+              <div class="col-auto flex-grow-1">
+                <input type="text" name="q" value="{{ user_search_query }}" class="form-control" placeholder="Search by username or email...">
+              </div>
+              <div class="col-auto">
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-search"></i> Search
+                </button>
+                {% if user_search_query %}
+                  <a href="?tab=users" class="btn btn-outline-secondary">Clear</a>
+                {% endif %}
+              </div>
             </form>
 
             <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>
-                                <a href="?sort=username&q={{ search_query }}" class="text-decoration-none text-dark">
-                                    Username <i class="bi bi-arrow-down-up small text-muted"></i>
-                                </a>
-                            </th>
-                            <th>
-                                <a href="?sort=email&q={{ search_query }}" class="text-decoration-none text-dark">
-                                    Email <i class="bi bi-arrow-down-up small text-muted"></i>
-                                </a>
-                            </th>
-                            <th>
-                                <a href="?sort=date_joined&q={{ search_query }}" class="text-decoration-none text-dark">
-                                    Date Joined <i class="bi bi-arrow-down-up small text-muted"></i>
-                                </a>
-                            </th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for u in users %}
-                        <tr>
-                            <td>{{ u.username }}</td>
-                            <td>{{ u.email }}</td>
-                            <td>{{ u.date_joined|date:"M d, Y" }}</td>
-                            <td>
-                                {% if u.is_active %}
-                                    <span class="badge bg-success">Active</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">Inactive</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="text-center py-3">No users found.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+              <table class="table table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>
+                      <a href="?tab=users&sort=username&q={{ user_search_query }}" class="text-decoration-none text-dark">
+                        Username <i class="bi bi-arrow-down-up small text-muted"></i>
+                      </a>
+                    </th>
+                    <th>
+                      <a href="?tab=users&sort=email&q={{ user_search_query }}" class="text-decoration-none text-dark">
+                        Email <i class="bi bi-arrow-down-up small text-muted"></i>
+                      </a>
+                    </th>
+                    <th>
+                      <a href="?tab=users&sort=date_joined&q={{ user_search_query }}" class="text-decoration-none text-dark">
+                        Date Joined <i class="bi bi-arrow-down-up small text-muted"></i>
+                      </a>
+                    </th>
+                    <th>Status</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for u in users %}
+                  <tr>
+                    <td>
+                      <img src="{{ u.mini_gravatar }}" alt="{{ u.username }}" style="width: 32px; height: 32px; border-radius: 50%; margin-right: 8px; vertical-align: middle;">
+                      {{ u.username }}
+                    </td>
+                    <td>{{ u.email }}</td>
+                    <td>{{ u.date_joined|date:"M d, Y" }}</td>
+                    <td>
+                      {% if u.is_active %}
+                        <span class="badge bg-success">Active</span>
+                      {% else %}
+                        <span class="badge bg-secondary">Inactive</span>
+                      {% endif %}
+                      {% if u.flagged_for_deletion %}
+                        <span class="badge bg-warning text-dark">Flagged</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <span class="badge 
+                        {% if u.role == 'admin' %}bg-danger
+                        {% elif u.role == 'moderator' %}bg-info
+                        {% else %}bg-secondary{% endif %}">
+                        {{ u.get_role_display }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="btn-group btn-group-sm" role="group">
+                        {% include 'admin_actions.html' with target_user=u %}
+                      </div>
+                    </td>
+                  </tr>
+                  {% empty %}
+                  <tr>
+                    <td colspan="6" class="text-center py-3">No users found.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
             </div>
+          </div>
         </div>
       </div>
+      {% endif %}
+
+      {# Recipe Management Tab #}
+      <div id="recipes-section" class="tab-content-section {% if active_tab == 'recipes' %}active{% endif %}">
+        <div class="card">
+          <div class="card-header bg-light">
+            <h5 class="mb-0">
+              <i class="bi bi-book"></i> Recipe Management
+            </h5>
+          </div>
+          <div class="card-body">
+            <form method="get" action="." class="mb-4">
+              <input type="hidden" name="tab" value="recipes">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label">Search</label>
+                  <input type="text" name="rq" class="form-control" placeholder="Name, description, author, or tag" value="{{ recipe_search_query }}">
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label">Difficulty</label>
+                  <select name="difficulty" class="form-select">
+                    <option value="">Any</option>
+                    {% for value, label in available_difficulties %}
+                      <option value="{{ value }}" {% if recipe_difficulty == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label">Visibility</label>
+                  <select name="visibility" class="form-select">
+                    <option value="">Any</option>
+                    {% for value, label in available_visibilities %}
+                      <option value="{{ value }}" {% if recipe_visibility == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label">Sort by</label>
+                  <select name="rsort" class="form-select">
+                    <option value="-createdAt" {% if recipe_sort == '-createdAt' %}selected{% endif %}>Newest first</option>
+                    <option value="createdAt" {% if recipe_sort == 'createdAt' %}selected{% endif %}>Oldest first</option>
+                    <option value="name" {% if recipe_sort == 'name' %}selected{% endif %}>Name A-Z</option>
+                    <option value="-name" {% if recipe_sort == '-name' %}selected{% endif %}>Name Z-A</option>
+                    <option value="-averageRating" {% if recipe_sort == '-averageRating' %}selected{% endif %}>Rating high-low</option>
+                    <option value="averageRating" {% if recipe_sort == 'averageRating' %}selected{% endif %}>Rating low-high</option>
+                  </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                  <button type="submit" class="btn btn-primary w-100">Apply</button>
+                </div>
+              </div>
+              {% if recipe_search_query or recipe_difficulty or recipe_visibility %}
+                <div class="mt-2">
+                  <a href="?tab=recipes" class="btn btn-outline-secondary btn-sm">Reset Filters</a>
+                </div>
+              {% endif %}
+            </form>
+
+            <div class="list-group list-group-flush">
+              {% for recipe in recipes %}
+                <div class="list-group-item">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                      <h5 class="mb-1">{{ recipe.name }}</h5>
+                      <p class="mb-1 text-muted">{{ recipe.description|truncatechars:140 }}</p>
+                      <div class="small text-muted">
+                        <span class="me-2"><strong>Author:</strong> {{ recipe.author.username }}</span>
+                        <span class="me-2"><strong>Cuisine:</strong> {{ recipe.cuisine|default:"N/A" }}</span>
+                        <span class="me-2"><strong>Difficulty:</strong> {{ recipe.get_difficulty_display }}</span>
+                        <span class="me-2"><strong>Visibility:</strong> {{ recipe.get_visibility_display }}</span>
+                        <span class="me-2"><strong>Total time:</strong> {{ recipe.totalTime }}</span>
+                      </div>
+                      {% if recipe.tags.all %}
+                        <div class="mt-2">
+                          {% for tag in recipe.tags.all %}
+                            <span class="badge bg-light text-dark border">{{ tag.name }}</span>
+                          {% endfor %}
+                        </div>
+                      {% endif %}
+                    </div>
+                    <div class="text-end ms-3">
+                      <span class="badge bg-primary fs-6">{{ recipe.averageRating }} ★</span>
+                      <div class="small text-muted mb-2">{{ recipe.createdAt|date:"M j, Y" }}</div>
+                      {% if user.is_admin or user.is_moderator %}
+                        <div>
+                          {% include 'admin_actions.html' with recipe=recipe %}
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              {% empty %}
+                <div class="list-group-item">
+                  <p class="mb-0 text-center py-3">No recipes matched your filters.</p>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {# Moderator Info Section #}
+      {% if user.is_moderator and not user.is_admin %}
+      <div class="card mt-4">
+        <div class="card-body">
+          <h5 class="card-title">
+            <i class="bi bi-info-circle"></i> Moderator Permissions
+          </h5>
+          <p class="card-text">
+            As a moderator, you can:
+          </p>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">
+              <i class="bi bi-check-circle text-success me-2"></i>
+              Flag users for deletion
+            </li>
+            <li class="list-group-item">
+              <i class="bi bi-check-circle text-success me-2"></i>
+              Delete recipes
+            </li>
+            <li class="list-group-item">
+              <i class="bi bi-check-circle text-success me-2"></i>
+              View activity logs
+            </li>
+            <li class="list-group-item">
+              <i class="bi bi-x-circle text-muted me-2"></i>
+              Delete users (Admin only)
+            </li>
+            <li class="list-group-item">
+              <i class="bi bi-x-circle text-muted me-2"></i>
+              Manage user accounts (Admin only)
+            </li>
+          </ul>
+        </div>
+      </div>
+      {% endif %}
       
       <div class="mt-4">
         <a href="{% url 'dashboard' %}" class="btn btn-secondary">
@@ -94,5 +300,35 @@
     </div>
   </div>
 </div>
-{% endblock %}
 
+<script>
+function switchTab(tabName) {
+  // Hide all tab content sections
+  document.querySelectorAll('.tab-content-section').forEach(section => {
+    section.classList.remove('active');
+  });
+  
+  // Remove active class from all nav links
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.classList.remove('active');
+  });
+  
+  // Show selected tab content
+  const section = document.getElementById(tabName + '-section');
+  if (section) {
+    section.classList.add('active');
+  }
+  
+  // Add active class to selected nav link
+  const navLink = document.getElementById(tabName + '-tab');
+  if (navLink) {
+    navLink.classList.add('active');
+  }
+  
+  // Update URL without page reload
+  const url = new URL(window.location);
+  url.searchParams.set('tab', tabName);
+  window.history.pushState({}, '', url);
+}
+</script>
+{% endblock %}
