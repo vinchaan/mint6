@@ -79,7 +79,7 @@
                 <h5 class="mb-1">{{ recipe.name }}</h5>
                 <p class="mb-1 text-muted">{{ recipe.description|truncatechars:140 }}</p>
                 <div class="small text-muted">
-                  <span class="me-2"><strong>Author:</strong> {{ recipe.author.username }}</span>
+                  <span class="me-2"><strong>Author:</strong> <a href="{% url 'view_profile' recipe.author.id %}" class="text-decoration-none">{{ recipe.author.username }}</a></span>
                   <span class="me-2"><strong>Cuisine:</strong> {{ recipe.cuisine|default:"N/A" }}</span>
                   <span class="me-2"><strong>Difficulty:</strong> {{ recipe.get_difficulty_display }}</span>
                   <span class="me-2"><strong>Visibility:</strong> {{ recipe.get_visibility_display }}</span>
@@ -97,7 +97,17 @@
               <div class="text-end">
                 <span class="badge bg-primary fs-6">{{ recipe.averageRating }} ★</span>
                 <div class="small text-muted">{{ recipe.createdAt|date:"M j, Y" }}</div>
-              </div>
+                <div class="mt-2">
+                  <a href="{% url 'view_recipe' recipe.id %}" class="btn btn-sm btn-outline-primary">
+                    View recipe
+                  </a>
+                </div>
+                {% if user.is_admin or user.is_moderator %}
+                  <div class="mt-2">
+                    {% include 'admin_actions.html' with recipe=recipe %}
+                  </div>
+                {% endif %}
+              </div>              
             </div>
           </div>
         {% empty %}

@@ -251,12 +251,6 @@
         {% if results %}
             <div class="row">
                 {% for user in results %}
-<<<<<<< HEAD
-                    <li>
-                        {% include "partials/user_avatar.html" with user=user %}
-                        {{ user.username }}
-                    </li>
-=======
                 <div class="col-md-6 col-lg-4 mb-3">
                     <div class="user-card">
                         <img 
@@ -280,12 +274,11 @@
                                 </span>
                             </div>
                         </div>
-                        <a href="{% url 'profile' %}?user_id={{ user.id }}" class="view-profile-btn">
+                        <a href="{% url 'view_profile' user.id %}" class="view-profile-btn">
                             View Profile
                         </a>
                     </div>
                 </div>
->>>>>>> 8db5d05324f813ea9ca825f69a4e8aed5057c697
                 {% endfor %}
             </div>
         {% else %}
@@ -305,10 +298,5 @@
             <p class="text-muted">Enter a username or email above to find users</p>
         </div>
     {% endif %}
-<<<<<<< HEAD
-
-{% endblock %}
-=======
 </div>
 {% endblock %}
->>>>>>> 8db5d05324f813ea9ca825f69a4e8aed5057c697

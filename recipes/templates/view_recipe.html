@@ -1,0 +1,145 @@
+{% extends "base_content.html" %}
+{% block content %}
+<div class="container py-3">
+
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+      <h1 class="h3 mb-1">{{ recipe.name }}</h1>
+      <div class="text-muted">
+        By <strong><a href="{% url 'view_profile' recipe.author.id %}" class="text-decoration-none">{{ recipe.author.username }}</a></strong>
+        • {{ recipe.createdAt|date:"M j, Y" }}
+        {% if recipe.updatedAt %}
+          • Updated {{ recipe.updatedAt|date:"M j, Y" }}
+        {% endif %}
+      </div>
+
+      <div class="mt-2">
+        {% for tag in recipe.tags.all %}
+          <span class="badge bg-light text-dark border">{{ tag.name }}</span>
+        {% empty %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="text-end">
+      <div class="badge bg-primary fs-6">{{ recipe.averageRating }} ★</div>
+      <div class="small text-muted">{{ recipe.ratingCount }} rating{{ recipe.ratingCount|pluralize }}</div>
+      <div class="small text-muted">{{ recipe.favouritesCount }} favourite{{ recipe.favouritesCount|pluralize }}</div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <p class="mb-0">{{ recipe.description }}</p>
+    </div>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 mb-4">
+    <span class="badge bg-light text-dark border">Serves: {{ recipe.serves }}</span>
+    <span class="badge bg-light text-dark border">Difficulty: {{ recipe.get_difficulty_display }}</span>
+    <span class="badge bg-light text-dark border">Cuisine: {{ recipe.cuisine|default:"N/A" }}</span>
+    <span class="badge bg-light text-dark border">Visibility: {{ recipe.get_visibility_display }}</span>
+  </div>
+  
+
+  <div class="row g-3">
+    <div class="col-lg-5">
+      <div class="card mb-3">
+        <div class="card-header fw-semibold">Ingredients</div>
+        <ul class="list-group list-group-flush">
+          {% for ing in ingredients %}
+            <li class="list-group-item d-flex justify-content-between align-items-start">
+              <div>{{ ing.text }}</div>
+              <span class="badge bg-light text-dark border">{{ ing.position }}</span>
+            </li>
+          {% empty %}
+            <li class="list-group-item text-muted">No ingredients listed.</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-header fw-semibold">Times</div>
+        <div class="card-body">
+          <div><strong>Prep:</strong> {{ recipe.prepTime }}</div>
+          <div><strong>Cook:</strong> {{ recipe.cookTime }}</div>
+          <div><strong>Total:</strong> {{ recipe.totalTime }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      <div class="card mb-3">
+        <div class="card-header fw-semibold">Steps</div>
+        <ol class="list-group list-group-numbered list-group-flush">
+          {% for step in steps %}
+            <li class="list-group-item">{{ step.text }}</li>
+          {% empty %}
+            <li class="list-group-item text-muted">No steps listed.</li>
+          {% endfor %}
+        </ol>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-header fw-semibold">Ratings & Reviews</div>
+        <div class="list-group list-group-flush">
+          {% for r in ratings %}
+            <div class="list-group-item">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="fw-semibold">{{ r.user.username }}</div>
+                  {% if r.comment %}
+                    <div class="text-muted">{{ r.comment }}</div>
+                  {% else %}
+                    <div class="text-muted fst-italic">No comment.</div>
+                  {% endif %}
+                </div>
+                <div class="text-end">
+                  <span class="badge bg-primary">{{ r.rating }} ★</span>
+                  <div class="small text-muted">{{ r.createdAt|date:"M j, Y" }}</div>
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <div class="list-group-item text-muted">No ratings yet.</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      {% if user.is_authenticated %}
+        <div class="card mb-3">
+          <div class="card-header fw-semibold">Your Actions</div>
+          <div class="card-body">
+            <div class="d-flex gap-2 mb-3">
+              {% if is_favourited %}
+                <a href="{% url 'favourite_recipe' recipe.id %}" class="btn btn-warning">
+                  <i class="bi bi-star-fill"></i> Remove from Favourites
+                </a>
+              {% else %}
+                <a href="{% url 'favourite_recipe' recipe.id %}" class="btn btn-outline-warning">
+                  <i class="bi bi-star"></i> Add to Favourites
+                </a>
+              {% endif %}
+              
+              {% if user_rating %}
+                <a href="{% url 'add_rating' recipe.id %}" class="btn btn-primary">
+                  <i class="bi bi-pencil"></i> Update Your Rating
+                </a>
+              {% else %}
+                <a href="{% url 'add_rating' recipe.id %}" class="btn btn-primary">
+                  <i class="bi bi-star"></i> Rate This Recipe
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endif %}
+
+      <div class="mt-3">
+        <a href="{% url 'search_recipe' %}" class="btn btn-outline-secondary">Back to search</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
