@@ -97,12 +97,21 @@
               <div class="text-end">
                 <span class="badge bg-primary fs-6">{{ recipe.averageRating }} ★</span>
                 <div class="small text-muted">{{ recipe.createdAt|date:"M j, Y" }}</div>
+<<<<<<< HEAD
                 {% if user.is_admin or user.is_moderator %}
                   <div class="mt-2">
                     {% include 'admin_actions.html' with recipe=recipe %}
                   {% endif %}
                 </div>
               </div>
+=======
+                <div class="mt-2">
+                  <a href="{% url 'view_recipe' recipe.id %}" class="btn btn-sm btn-outline-primary">
+                    View recipe
+                  </a>
+                </div>
+              </div>              
+>>>>>>> 7fd0b0c5e0d62b52c016a3dcb22c5a013a5af060
             </div>
           </div>
         {% empty %}
