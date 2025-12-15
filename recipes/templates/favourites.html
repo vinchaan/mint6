@@ -1,0 +1,53 @@
+{% extends 'base_content.html' %}
+{% block content %}
+  <div class="container mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h1 class="h4 mb-1">Your favourites</h1>
+        <p class="text-muted mb-0">Recipes you've saved.</p>
+      </div>
+      <span class="badge bg-secondary fs-6">Total: {{ recipes|length }}</span>
+    </div>
+
+    <div class="card">
+      <div class="list-group list-group-flush">
+        {% for recipe in recipes %}
+          <div class="list-group-item">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h5 class="mb-1">
+                  <a href="{% url 'view_recipe' recipe.id %}" class="text-decoration-none">{{ recipe.name }}</a>
+                </h5>
+                <p class="mb-1 text-muted">{{ recipe.description|truncatechars:140 }}</p>
+                <div class="small text-muted">
+                  <span class="me-2"><strong>Author:</strong> {{ recipe.author.username }}</span>
+                  <span class="me-2"><strong>Cuisine:</strong> {{ recipe.cuisine|default:"N/A" }}</span>
+                  <span class="me-2"><strong>Difficulty:</strong> {{ recipe.get_difficulty_display }}</span>
+                  <span class="me-2"><strong>Total time:</strong> {{ recipe.totalTime }}</span>
+                </div>
+                {% if recipe.tags.all %}
+                  <div class="mt-2">
+                    {% for tag in recipe.tags.all %}
+                      <span class="badge bg-light text-dark border">{{ tag.name }}</span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="text-end ms-3">
+                <span class="badge bg-primary fs-6">{{ recipe.averageRating }} ★</span>
+                <div class="small text-muted mt-1">{{ recipe.createdAt|date:"M j, Y" }}</div>
+                <a href="{% url 'view_recipe' recipe.id %}" class="btn btn-sm btn-outline-secondary mt-2">View</a>
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="list-group-item text-center py-5">
+            <p class="text-muted mb-3">You haven't added any favourites yet.</p>
+            <a href="{% url 'search_recipe' %}" class="btn btn-primary">Find recipes</a>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
